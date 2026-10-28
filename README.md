@@ -17,21 +17,21 @@ google-chrome --remote-debugging-address=127.0.0.1 --remote-debugging-port=9222 
 # Log in to X in this Chrome profile, then:
 npm run dev
 ```
-Visit http://127.0.0.1:3000. Keep Chrome open and signed in. Draft handoff uses CDP and requires no X API credentials.
+Visit http://127.0.0.1:3000. Keep Chrome open and signed in. Posting uses your connected Chrome CDP session and requires no X API credentials. Each post requires explicit approval in the dashboard.
 
 ## Features
 - Search X Live tab for configured queries, scroll and collect mentioned/author profile handles.
 - Open profiles, collect public bio/name/followers/website/recent posts, AI-classify account type and chain (or Unknown).
 - Persist unique accounts and evidence source links in SQLite `data/scout.db`.
 - Start, stop, one-shot scan, periodic scans, logs, filters, CSV export.
-- AI Studio: generate and edit a draft, click Prepare in Chromium to fill the editor, manually click Post/Reply inside X. Paste the resulting post URL in History.
+- AI Studio: generate and edit a draft, then click **Accept & Post to X**. The browser submits exactly that approved post or reply, observes X's CreateTweet response, and stores the direct link when confirmed.
 - Visible purple cursor overlay in Chrome tabs during discovery. If X page CSP or dynamic rendering prevents injection, inspect logs and try Chrome in headed mode.
 
 ## Limitations and security
 - X DOM structure can change; CDP-based discovery may require selector maintenance and may be restricted by X rules. Use only in accordance with applicable platform rules; prefer authorized X APIs for production discovery. This is not an officially supported X scraping integration.
 - The classification is heuristic and may include influencer or false-project accounts. Review evidence before outreach.
-- OAuth credentials are stored in local SQLite in plaintext; keep the app bound to 127.0.0.1, protect the machine and database. This prototype is **not** suitable for exposing on the public internet without authentication and encryption at rest.
+- Keep the local dashboard bound to 127.0.0.1. Do not expose the unauthenticated control panel on the public internet. Never commit OpenRouter credentials or Chrome profiles.
 - OpenRouter classification failures store `uncertain` rather than fabricate a verdict.
-- Preparing drafts does not publish. The History screen tracks prepared drafts and manually verified published links.
+- A single approved dashboard click submits one post or reply. If X's response cannot be verified, the entry is marked `unconfirmed` and the tab is left open for inspection rather than blindly retrying.
 - `npm run check` runs TypeScript validation. `npm test` runs unit tests.
-- No automated publishing, unsolicited replies, likes, follows or DMs. X prohibits non-API website-scripting automation: https://help.x.com/en/rules-and-policies/x-automation
+- User-approved CDP publication is implemented; no unattended mass replies, automated likes/follows, or DMs. Browser scripting may violate X's automation rules and may put the account at risk: https://help.x.com/en/rules-and-policies/x-automation
