@@ -1,0 +1,12 @@
+import Database from 'better-sqlite3';
+import fs from 'node:fs';
+fs.mkdirSync('data',{recursive:true});
+export const db=new Database('data/scout.db');db.pragma('journal_mode = WAL');
+db.exec(`CREATE TABLE IF NOT EXISTS accounts (username TEXT PRIMARY KEY, display_name TEXT, bio TEXT, followers INTEGER, following INTEGER, website TEXT, category TEXT DEFAULT 'unclassified', chain TEXT DEFAULT 'Unknown', confidence INTEGER DEFAULT 0, reason TEXT, source_url TEXT, profile_url TEXT, recent_posts TEXT DEFAULT '[]', discovered_at TEXT DEFAULT CURRENT_TIMESTAMP, updated_at TEXT DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE IF NOT EXISTS events(id INTEGER PRIMARY KEY AUTOINCREMENT, level TEXT, message TEXT, created_at TEXT DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE IF NOT EXISTS publications(id INTEGER PRIMARY KEY AUTOINCREMENT, kind TEXT NOT NULL, text TEXT NOT NULL, reply_to TEXT, x_post_id TEXT, url TEXT, status TEXT NOT NULL, error TEXT, created_at TEXT DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE IF NOT EXISTS oauth(state TEXT PRIMARY KEY, verifier TEXT NOT NULL, created_at INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS credentials(key TEXT PRIMARY KEY, value TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS settings(key TEXT PRIMARY KEY,value TEXT NOT NULL);`);
+export const log=(message:string,level='info')=>{db.prepare('INSERT INTO events(level,message) VALUES(?,?)').run(level,message);console.log(`[${level}] ${message}`)};
+export const setting=(key:string)=> (db.prepare('SELECT value FROM settings WHERE key=?').get(key) as {value:string}|undefined)?.value;
