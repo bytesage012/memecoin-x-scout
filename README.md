@@ -35,3 +35,12 @@ Visit http://127.0.0.1:3000. Keep Chrome open and signed in. Posting uses your c
 - A single approved dashboard click submits one post or reply. If X's response cannot be verified, the entry is marked `unconfirmed` and the tab is left open for inspection rather than blindly retrying.
 - `npm run check` runs TypeScript validation. `npm test` runs unit tests.
 - User-approved CDP publication is implemented; no unattended mass replies, automated likes/follows, or DMs. Browser scripting may violate X's automation rules and may put the account at risk: https://help.x.com/en/rules-and-policies/x-automation
+
+
+## Rate-limit protection
+- Discovery now rotates **two configured X searches per cycle** instead of scanning every query each time.
+- Each search uses no more than two scroll rounds, and a cycle visits at most eight new profiles.
+- The scheduler runs at least every 20 minutes; manual Scan Once still obeys an active X cooldown.
+- When X responds with HTTP 429, scanning stops and waits at least 30 minutes before resuming. A longer cooldown may be necessary depending on X's limits.
+- OpenRouter's HTTP 429 response triggers a shared cooldown that uses `Retry-After` if provided (capped at one hour). Accounts saved without classification can be re-evaluated after cooldown in a future iteration.
+- Avoid opening extra crawler copies or rotating accounts/proxies to evade rate limits. Check `/api/events` to see which service is limiting.
