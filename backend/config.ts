@@ -1,0 +1,4 @@
+import fs from 'node:fs';
+export type Config={discovery:{intervalMinutes:number;scrollRounds:number;maxProfilesPerCycle:number;maxRecentPosts:number;queries:string[]};ai:{systemPrompt:string};ui:{visualCursor:boolean}};
+export function config():Config{return JSON.parse(fs.readFileSync('config/config.json','utf8')) as Config}
+export function saveConfig(c:Config){if(!Array.isArray(c.discovery?.queries)||!c.ai?.systemPrompt||!Number.isFinite(c.discovery.intervalMinutes))throw new Error('Invalid configuration');c.discovery.intervalMinutes=Math.max(2,Math.min(1440,c.discovery.intervalMinutes));c.discovery.scrollRounds=Math.max(1,Math.min(10,c.discovery.scrollRounds));c.discovery.maxProfilesPerCycle=Math.max(1,Math.min(100,c.discovery.maxProfilesPerCycle));fs.writeFileSync('config/config.json',JSON.stringify(c,null,2));}
